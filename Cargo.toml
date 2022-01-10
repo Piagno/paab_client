@@ -1,0 +1,11 @@
+[package]
+name = "paab_client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ureq = { version = "2.4.0", features = ["json"] }
+serde = { version = "1.0.133", features = ["derive"] }
+eframe = "0.16.0"
