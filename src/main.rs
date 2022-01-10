@@ -1,3 +1,4 @@
+#![windows_subsystem = "windows"]
 use eframe::{
     egui::{CentralPanel, FontDefinitions, FontFamily, ScrollArea},
     epi::App,
