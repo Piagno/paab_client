@@ -5,9 +5,13 @@ use eframe::{
     run_native, NativeOptions,
 };
 use serde::Deserialize;
+use std::time::{Duration, SystemTime};
 use ureq;
 
+const UPDATE_RATE: Duration = Duration::from_secs(1);
+
 struct Paab {
+    updated: SystemTime,
     trains: Vec<Train>,
 }
 
@@ -18,13 +22,18 @@ impl App for Paab {
         _frame: &eframe::epi::Frame,
         _storage: Option<&dyn eframe::epi::Storage>,
     ) {
-        self.configure_fonts(ctx)
+        self.configure_fonts(ctx);
     }
 
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &eframe::epi::Frame) {
+        if(self.updated.elapsed().expect("ERROR THINGI") >= UPDATE_RATE){
+            self.updated = SystemTime::now();
+            self.trains = fetch_trains();
+        }
+        ctx.request_repaint();
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                for train in fetch_trains() {
+                for train in &self.trains {
                     ui.label(&train.train_number);
                     ui.label(&train.train_type);
                     ui.label(&train.departure_time);
@@ -41,6 +50,7 @@ impl App for Paab {
 impl Paab {
     fn new() -> Paab {
         Paab {
+            updated: SystemTime::now(),
             trains: fetch_trains(),
         }
     }
