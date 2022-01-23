@@ -9,6 +9,7 @@ use std::time::{Duration, SystemTime};
 use ureq;
 
 const UPDATE_RATE: Duration = Duration::from_secs(1);
+const NO_RETARD: &str = "No retard";
 
 struct Paab {
     updated: SystemTime,
@@ -26,7 +27,7 @@ impl App for Paab {
     }
 
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &eframe::epi::Frame) {
-        if(self.updated.elapsed().expect("ERROR THINGI") >= UPDATE_RATE){
+        if self.updated.elapsed().expect("ERROR THINGI") >= UPDATE_RATE {
             self.updated = SystemTime::now();
             self.trains = fetch_trains();
         }
@@ -36,7 +37,30 @@ impl App for Paab {
                 for train in &self.trains {
                     ui.label(&train.train_number);
                     ui.label(&train.train_type);
+                    ui.label(&train.drives);
                     ui.label(&train.departure_time);
+                    match &train.estimated_retard {
+                        Option::Some(estimated_retard) => {
+                            let estimated_retard = estimated_retard.parse().unwrap();
+                            match estimated_retard {
+                                0 => ui.label(NO_RETARD),
+                                _ => ui.label(estimated_retard.to_string()),
+                            }
+                        }
+                        Option::None => ui.label(NO_RETARD),
+                    };
+                    match &train.additional_info {
+                        Option::Some(additional_info) => ui.label(additional_info),
+                        Option::None => ui.label(""),
+                    };
+                    ui.label("Effective departure at: ");
+                    match &train.effective_departure_time {
+                        Option::Some(effective_departure_time) => {
+                            ui.label(effective_departure_time)
+                        }
+                        Option::None => ui.label(""),
+                    };
+                    ui.separator();
                 }
             })
         });
