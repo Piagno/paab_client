@@ -9,3 +9,4 @@ edition = "2021"
 ureq = { version = "2.4.0", features = ["json"] }
 serde = { version = "1.0.133", features = ["derive"] }
 eframe = "0.16.0"
+thiserror = "1.0.30"

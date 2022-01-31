@@ -5,11 +5,24 @@ use eframe::{
     run_native, NativeOptions,
 };
 use serde::Deserialize;
+use std::fmt::Display;
 use std::time::{Duration, SystemTime};
 use ureq;
 
 const UPDATE_RATE: Duration = Duration::from_secs(1);
 const NO_RETARD: &str = "No retard";
+
+#[derive(thiserror::Error, Debug)]
+enum TrainError {
+    RequestFailed(#[from] ureq::Error),
+    ConvertingFailed(#[from] std::io::Error),
+}
+
+impl Display for TrainError {
+    fn fmt(&self, _: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        todo!()
+    }
+}
 
 struct Paab {
     updated: SystemTime,
@@ -29,7 +42,10 @@ impl App for Paab {
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &eframe::epi::Frame) {
         if self.updated.elapsed().expect("ERROR THINGI") >= UPDATE_RATE {
             self.updated = SystemTime::now();
-            self.trains = fetch_trains();
+            match fetch_trains() {
+                Ok(trains) => self.trains = trains,
+                _ => (),
+            }
         }
         ctx.request_repaint();
         CentralPanel::default().show(ctx, |ui| {
@@ -75,7 +91,7 @@ impl Paab {
     fn new() -> Paab {
         Paab {
             updated: SystemTime::now(),
-            trains: fetch_trains(),
+            trains: fetch_trains().unwrap_or(Vec::new()),
         }
     }
     fn configure_fonts(&self, ctx: &eframe::egui::CtxRef) {
@@ -113,10 +129,8 @@ struct Train {
     additional_info: Option<String>,
 }
 
-fn fetch_trains() -> Vec<Train> {
-    return ureq::get("https://tool.piagno.ch/paab/api.php")
-        .call()
-        .unwrap()
-        .into_json()
-        .unwrap();
+fn fetch_trains() -> Result<Vec<Train>, TrainError> {
+    Ok(ureq::get("https://tool.piagno.ch/paab/api.php")
+        .call()?
+        .into_json()?)
 }
