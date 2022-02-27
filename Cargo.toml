@@ -10,3 +10,12 @@ ureq = { version = "2.4.0", features = ["json"] }
 serde = { version = "1.0.133", features = ["derive"] }
 eframe = "0.16.0"
 thiserror = "1.0.30"
+chrono = {version = "0.4", features=["wasmbind"]}
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+reqwasm = "0.4.0"
+gloo-timers = "0.2"
+wasm-bindgen-futures = "0.4"
