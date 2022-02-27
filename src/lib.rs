@@ -74,6 +74,8 @@ impl App for Paab {
             thread::sleep(StdDuration::from_secs(UPDATE_RATE.unsigned_abs()));
         });
         #[cfg(target_arch = "wasm32")]
+        wasm_bindgen_futures::spawn_local(fetch_trains(trains_tx.clone()));
+        #[cfg(target_arch = "wasm32")]
         gloo_timers::callback::Interval::new((UPDATE_RATE * 1000) as u32, move || {
             wasm_bindgen_futures::spawn_local(fetch_trains(trains_tx.clone()));
         })
