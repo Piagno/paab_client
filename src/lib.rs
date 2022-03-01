@@ -1,5 +1,5 @@
 #![windows_subsystem = "windows"]
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime,  Utc};
 use eframe::{
     egui::{color::Color32, CentralPanel, FontDefinitions, FontFamily, ScrollArea},
     epi::App,
@@ -98,11 +98,23 @@ impl App for Paab {
                     let drives = String::from("1");
                     let outage = String::from("outage");
                     ui.label(format!("{} {}", train.train_number, train.train_type));
-                    ui.label(format!("Planned departure: {}", train.departure_time));
+                    ui.label(format!(
+                        "Planned departure: {}.{} {}:{}",
+                        &train.departure_time[8..10],
+                        &train.departure_time[5..7],
+                        &train.departure_time[11..13],
+                        &train.departure_time[14..16],
+                    ));
                     match &train.effective_departure_time {
                         Option::Some(effective_departure_time) => ui.colored_label(
                             Color32::GREEN,
-                            format!("Effective departure at: {}", effective_departure_time),
+                            format!(
+                                "Effective departure: {}.{} {}:{}",
+                                &effective_departure_time[8..10],
+                                &effective_departure_time[5..7],
+                                &effective_departure_time[11..13],
+                                &effective_departure_time[14..16],
+                            ),
                         ),
                         Option::None => match &train.drives {
                             drives => match &train.estimated_retard {
@@ -113,7 +125,7 @@ impl App for Paab {
                                         _ => ui.colored_label(
                                             Color32::from_rgb(255, 136, 0),
                                             format!(
-                                                "Drives with estimated {} minutes retard",
+                                                "Estimated departure: {} min retard",
                                                 estimated_retard
                                             ),
                                         ),
