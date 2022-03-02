@@ -39,15 +39,10 @@ impl Display for TrainError {
     }
 }
 
-enum Msg {
-    Refresh,
-}
-
 pub struct Paab {
     updated: DateTime<Utc>,
     trains: Vec<Train>,
     trains_rx: Option<Receiver<Vec<Train>>>,
-    app_tx: Option<SyncSender<Msg>>,
 }
 
 impl App for Paab {
@@ -59,8 +54,6 @@ impl App for Paab {
     ) {
         self.configure_fonts(ctx);
         let (mut trains_tx, trains_rx) = channel();
-        let (app_tx, app_rx) = sync_channel(1);
-        self.app_tx = Some(app_tx);
         self.trains_rx = Some(trains_rx);
         #[cfg(not(target_arch = "wasm32"))]
         thread::spawn(move || loop {
@@ -165,7 +158,6 @@ impl Paab {
             #[cfg(target_arch = "wasm32")]
             trains: Vec::new(),
             trains_rx: None,
-            app_tx: None,
         };
     }
     fn configure_fonts(&self, ctx: &eframe::egui::CtxRef) {
