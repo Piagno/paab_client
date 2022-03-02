@@ -11,10 +11,10 @@ use reqwasm;
 use serde::Deserialize;
 use std::{
     fmt::Display,
-    sync::mpsc::{channel, Receiver},
-    thread,
-    time::Duration as StdDuration,
+    sync::mpsc::{channel, Receiver}
 };
+#[cfg(not(target_arch = "wasm32"))]
+use std::{thread, time::Duration as StdDuration};
 #[cfg(not(target_arch = "wasm32"))]
 use ureq;
 #[cfg(target_arch = "wasm32")]
@@ -53,7 +53,7 @@ impl App for Paab {
         _storage: Option<&dyn eframe::epi::Storage>,
     ) {
         self.configure_fonts(ctx);
-        let (mut trains_tx, trains_rx) = channel();
+        let (trains_tx, trains_rx) = channel();
         self.trains_rx = Some(trains_rx);
         #[cfg(not(target_arch = "wasm32"))]
         thread::spawn(move || loop {
