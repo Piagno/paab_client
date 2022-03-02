@@ -11,7 +11,7 @@ use reqwasm;
 use serde::Deserialize;
 use std::{
     fmt::Display,
-    sync::mpsc::{channel, sync_channel, Receiver, SyncSender},
+    sync::mpsc::{channel, Receiver},
     thread,
     time::Duration as StdDuration,
 };
@@ -57,7 +57,6 @@ impl App for Paab {
         self.trains_rx = Some(trains_rx);
         #[cfg(not(target_arch = "wasm32"))]
         thread::spawn(move || loop {
-            println!("Fetching Trains");
             if let Ok(trains) = fetch_trains() {
                 if let Err(e) = trains_tx.send(trains) {
                     panic!("Error sending news data: {}", e);
@@ -74,7 +73,7 @@ impl App for Paab {
         .forget();
     }
 
-    fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &eframe::epi::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::CtxRef, _frame: &eframe::epi::Frame) {
         ctx.request_repaint();
         if let Some(rx) = &self.trains_rx {
             match rx.try_recv() {
