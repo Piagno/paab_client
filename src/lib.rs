@@ -1,5 +1,5 @@
 #![windows_subsystem = "windows"]
-use chrono::{DateTime,  Utc};
+use chrono::{DateTime, Utc};
 use eframe::{
     egui::{color::Color32, CentralPanel, FontDefinitions, FontFamily, ScrollArea},
     epi::App,
@@ -22,7 +22,6 @@ use wasm_bindgen_futures;
 
 const UPDATE_RATE: i64 = 15;
 const API_URL: &str = "https://tool.piagno.ch/paab/api.php";
-const NO_RETARD: &str = "Drives on time";
 
 #[derive(thiserror::Error, Debug)]
 enum TrainError {
@@ -95,51 +94,56 @@ impl App for Paab {
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
                 for train in &self.trains {
-                    let drives = String::from("1");
-                    let outage = String::from("outage");
                     ui.label(format!("{} {}", train.train_number, train.train_type));
                     ui.label(format!(
-                        "Planned departure: {}.{} {}:{}",
-                        &train.departure_time[8..10],
-                        &train.departure_time[5..7],
-                        &train.departure_time[11..13],
-                        &train.departure_time[14..16],
+                        "Planned departure: {}",
+                        pretty_print_datetime(&train.departure_time)
                     ));
                     match &train.effective_departure_time {
-                        Option::Some(effective_departure_time) => ui.colored_label(
-                            Color32::GREEN,
-                            format!(
-                                "Effective departure: {}.{} {}:{}",
-                                &effective_departure_time[8..10],
-                                &effective_departure_time[5..7],
-                                &effective_departure_time[11..13],
-                                &effective_departure_time[14..16],
-                            ),
-                        ),
-                        Option::None => match &train.drives {
-                            drives => match &train.estimated_retard {
+                        Option::Some(effective_departure_time) => {
+                            ui.colored_label(
+                                Color32::GREEN,
+                                format!(
+                                    "Effective departure: {}",
+                                    pretty_print_datetime(effective_departure_time)
+                                ),
+                            );
+                        }
+                        Option::None => match &train.drives[..] {
+                            "1" => match &train.estimated_retard {
                                 Option::Some(estimated_retard) => {
                                     let estimated_retard = estimated_retard.parse().unwrap();
                                     match estimated_retard {
-                                        0 => ui.label(NO_RETARD),
-                                        _ => ui.colored_label(
-                                            Color32::from_rgb(255, 136, 0),
-                                            format!(
-                                                "Estimated departure: {} min retard",
-                                                estimated_retard
-                                            ),
-                                        ),
+                                        0 => (),
+                                        _ => {
+                                            ui.colored_label(
+                                                Color32::from_rgb(255, 136, 0),
+                                                format!(
+                                                    "Estimated departure: {} min retard",
+                                                    estimated_retard
+                                                ),
+                                            );
+                                        }
                                     }
                                 }
-                                Option::None => ui.label(NO_RETARD),
+                                Option::None => (),
                             },
-                            outage => ui.colored_label(Color32::RED, "Outage of the train!"),
-                            _ => ui.label(&train.drives),
+                            "outage" => {
+                                ui.colored_label(Color32::RED, "Outage of the train!");
+                            }
+                            _ => {
+                                ui.label(&train.drives);
+                            }
                         },
                     };
                     match &train.additional_info {
-                        Option::Some(additional_info) => ui.label(additional_info),
-                        Option::None => ui.label(""),
+                        Option::Some(additional_info) => match &additional_info[..] {
+                            "" => (),
+                            _ => {
+                                ui.label(additional_info);
+                            }
+                        },
+                        Option::None => (),
                     };
                     ui.separator();
                 }
@@ -221,6 +225,16 @@ struct Train {
     departure_station: String,
     normal_run_time: String,
     additional_info: Option<String>,
+}
+
+fn pretty_print_datetime(datetime: &str) -> String {
+    format!(
+        "{}.{} {}:{}",
+        &datetime[8..10],
+        &datetime[5..7],
+        &datetime[11..13],
+        &datetime[14..16],
+    )
 }
 
 #[cfg(target_arch = "wasm32")]
