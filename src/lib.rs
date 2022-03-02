@@ -123,6 +123,23 @@ impl App for Paab {
                             "outage" => {
                                 ui.colored_label(Color32::RED, "Outage of the train!");
                             }
+                            "driven" => match &train.estimated_retard {
+                                Option::Some(estimated_retard) if estimated_retard == "0" => {
+                                    ui.colored_label(Color32::GREEN, "Driven");
+                                }
+                                Option::None => {
+                                    ui.colored_label(Color32::GREEN, "Driven");
+                                }
+                                Option::Some(estimated_retard) => {
+                                    ui.colored_label(
+                                        Color32::from_rgb(255, 136, 0),
+                                        format!(
+                                            "Estimated departure: {} min retard",
+                                            estimated_retard
+                                        ),
+                                    );
+                                }
+                            },
                             _ => {
                                 ui.label(&train.drives);
                             }
