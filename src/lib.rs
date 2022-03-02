@@ -11,7 +11,7 @@ use reqwasm;
 use serde::Deserialize;
 use std::{
     fmt::Display,
-    sync::mpsc::{channel, Receiver}
+    sync::mpsc::{channel, Receiver},
 };
 #[cfg(not(target_arch = "wasm32"))]
 use std::{thread, time::Duration as StdDuration};
@@ -20,7 +20,7 @@ use ureq;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen_futures;
 
-const UPDATE_RATE: i64 = 15;
+const UPDATE_RATE: u32 = 15000;
 const API_URL: &str = "https://tool.piagno.ch/paab/api.php";
 
 #[derive(thiserror::Error, Debug)]
@@ -62,12 +62,12 @@ impl App for Paab {
                     panic!("Error sending news data: {}", e);
                 }
             }
-            thread::sleep(StdDuration::from_secs(UPDATE_RATE.unsigned_abs()));
+            thread::sleep(StdDuration::from_millis(UPDATE_RATE as u64));
         });
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(fetch_trains(trains_tx.clone()));
         #[cfg(target_arch = "wasm32")]
-        gloo_timers::callback::Interval::new((UPDATE_RATE * 1000) as u32, move || {
+        gloo_timers::callback::Interval::new(UPDATE_RATE, move || {
             wasm_bindgen_futures::spawn_local(fetch_trains(trains_tx.clone()));
         })
         .forget();
