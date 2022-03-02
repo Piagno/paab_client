@@ -152,9 +152,6 @@ impl Paab {
     pub fn new() -> Paab {
         return Paab {
             updated: Utc::now(),
-            #[cfg(not(target_arch = "wasm32"))]
-            trains: fetch_trains().unwrap_or(Vec::new()),
-            #[cfg(target_arch = "wasm32")]
             trains: Vec::new(),
             trains_rx: None,
         };
