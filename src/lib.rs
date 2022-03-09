@@ -149,7 +149,7 @@ impl App for Paab {
                         Option::Some(additional_info) => match &additional_info[..] {
                             "" => (),
                             _ => {
-                                ui.label(additional_info);
+                                ui.colored_label(Color32::YELLOW,additional_info);
                             }
                         },
                         Option::None => (),
