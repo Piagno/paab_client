@@ -132,16 +132,16 @@ impl App for Paab {
                                 }
                                 Option::Some(estimated_retard) => {
                                     ui.colored_label(
-                                        Color32::from_rgb(255, 136, 0),
+                                        Color32::GREEN,
                                         format!(
-                                            "Estimated departure: {} min retard",
+                                            "Driven with estimated {} min retard",
                                             estimated_retard
                                         ),
                                     );
                                 }
                             },
                             _ => {
-                                ui.label(&train.drives);
+                                ui.colored_label(Color32::YELLOW, &train.drives);
                             }
                         },
                     };
@@ -149,7 +149,7 @@ impl App for Paab {
                         Option::Some(additional_info) => match &additional_info[..] {
                             "" => (),
                             _ => {
-                                ui.colored_label(Color32::YELLOW,additional_info);
+                                ui.colored_label(Color32::YELLOW, additional_info);
                             }
                         },
                         Option::None => (),
