@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 use chrono::{DateTime, Utc};
 use eframe::{
-    egui::{color::Color32, CentralPanel, FontDefinitions, FontFamily, ScrollArea},
+    egui::{color::Color32, CentralPanel, FontDefinitions, FontFamily, ScrollArea, Visuals},
     epi::App,
 };
 #[cfg(target_arch = "wasm32")]
@@ -52,7 +52,7 @@ impl App for Paab {
         _frame: &eframe::epi::Frame,
         _storage: Option<&dyn eframe::epi::Storage>,
     ) {
-        self.configure_fonts(ctx);
+        self.configure_styles(ctx);
         let (trains_tx, trains_rx) = channel();
         self.trains_rx = Some(trains_rx);
         #[cfg(not(target_arch = "wasm32"))]
@@ -173,7 +173,7 @@ impl Paab {
             trains_rx: None,
         };
     }
-    fn configure_fonts(&self, ctx: &eframe::egui::CtxRef) {
+    fn configure_styles(&self, ctx: &eframe::egui::CtxRef) {
         let mut font_def = FontDefinitions::default();
         font_def.family_and_size.insert(
             eframe::egui::TextStyle::Heading,
@@ -184,6 +184,9 @@ impl Paab {
             (FontFamily::Proportional, 20.),
         );
         ctx.set_fonts(font_def);
+        let mut visuals = Visuals::default();
+        visuals.dark_mode = true;
+        ctx.set_visuals(visuals)
     }
 }
 
