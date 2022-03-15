@@ -86,9 +86,10 @@ impl App for Paab {
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
                 for train in &self.trains {
-                    ui.label(format!("{} {}", train.train_number, train.train_type));
                     ui.label(format!(
-                        "Planned departure: {}",
+                        "{} {} {}",
+                        train.train_number,
+                        train.train_type,
                         pretty_print_datetime(&train.departure_time)
                     ));
                     match &train.effective_departure_time {
@@ -96,7 +97,7 @@ impl App for Paab {
                             ui.colored_label(
                                 Color32::GREEN,
                                 format!(
-                                    "Effective departure: {}",
+                                    "Departure: {}",
                                     pretty_print_datetime(effective_departure_time)
                                 ),
                             );
@@ -110,10 +111,7 @@ impl App for Paab {
                                         _ => {
                                             ui.colored_label(
                                                 Color32::from_rgb(255, 136, 0),
-                                                format!(
-                                                    "Estimated departure: {} min retard",
-                                                    estimated_retard
-                                                ),
+                                                format!("{} min retard", estimated_retard),
                                             );
                                         }
                                     }
@@ -121,7 +119,7 @@ impl App for Paab {
                                 Option::None => (),
                             },
                             "outage" => {
-                                ui.colored_label(Color32::RED, "Outage of the train!");
+                                ui.colored_label(Color32::RED, "Outage!");
                             }
                             "driven" => match &train.estimated_retard {
                                 Option::Some(estimated_retard) if estimated_retard == "0" => {
@@ -133,10 +131,7 @@ impl App for Paab {
                                 Option::Some(estimated_retard) => {
                                     ui.colored_label(
                                         Color32::GREEN,
-                                        format!(
-                                            "Driven with estimated {} min retard",
-                                            estimated_retard
-                                        ),
+                                        format!("Driven with {} min retard", estimated_retard),
                                     );
                                 }
                             },
@@ -236,13 +231,7 @@ struct Train {
 }
 
 fn pretty_print_datetime(datetime: &str) -> String {
-    format!(
-        "{}.{} {}:{}",
-        &datetime[8..10],
-        &datetime[5..7],
-        &datetime[11..13],
-        &datetime[14..16],
-    )
+    format!("{}:{}", &datetime[11..13], &datetime[14..16],)
 }
 
 #[cfg(target_arch = "wasm32")]
