@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 use chrono::{DateTime, Utc};
 use eframe::{
-    egui::{color::Color32, CentralPanel, FontDefinitions, FontFamily, ScrollArea, Visuals},
+    egui::{color::Color32, CentralPanel, FontDefinitions, FontFamily, Grid, ScrollArea, Visuals},
     epi::App,
 };
 #[cfg(target_arch = "wasm32")]
@@ -85,73 +85,77 @@ impl App for Paab {
         }
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                for train in &self.trains {
-                    ui.label(format!(
-                        "{} {} {}",
-                        train.train_number,
-                        train.train_type,
-                        pretty_print_datetime(&train.departure_time)
-                    ));
-                    match &train.effective_departure_time {
-                        Option::Some(effective_departure_time) => {
-                            ui.colored_label(
-                                Color32::GREEN,
-                                format!(
-                                    "Departure: {}",
-                                    pretty_print_datetime(effective_departure_time)
-                                ),
-                            );
-                        }
-                        Option::None => match &train.drives[..] {
-                            "1" => match &train.estimated_retard {
-                                Option::Some(estimated_retard) => {
-                                    let estimated_retard = estimated_retard.parse().unwrap();
-                                    match estimated_retard {
-                                        0 => (),
-                                        _ => {
-                                            ui.colored_label(
-                                                Color32::from_rgb(255, 136, 0),
-                                                format!("{} min retard", estimated_retard),
-                                            );
+                Grid::new("grid").show(ui, |ui| {
+                    for train in &self.trains {
+                        ui.label(&train.train_number);
+                        ui.label(&train.train_type);
+                        ui.label(pretty_print_datetime(&train.departure_time));
+                        match &train.effective_departure_time {
+                            Option::Some(effective_departure_time) => {
+                                ui.colored_label(
+                                    Color32::GREEN,
+                                    format!(
+                                        "Departure: {}",
+                                        pretty_print_datetime(effective_departure_time)
+                                    ),
+                                );
+                            }
+                            Option::None => match &train.drives[..] {
+                                "1" => match &train.estimated_retard {
+                                    Option::Some(estimated_retard) => {
+                                        let estimated_retard = estimated_retard.parse().unwrap();
+                                        match estimated_retard {
+                                            0 => (),
+                                            _ => {
+                                                ui.colored_label(
+                                                    Color32::from_rgb(255, 136, 0),
+                                                    format!("{} min retard", estimated_retard),
+                                                );
+                                            }
                                         }
                                     }
+                                    Option::None => (),
+                                },
+                                "outage" => {
+                                    ui.colored_label(Color32::RED, "Outage!");
                                 }
-                                Option::None => (),
+                                "driven" => match &train.estimated_retard {
+                                    Option::Some(estimated_retard) if estimated_retard == "0" => {
+                                        ui.colored_label(Color32::GREEN, "Driven");
+                                    }
+                                    Option::None => {
+                                        ui.colored_label(Color32::GREEN, "Driven");
+                                    }
+                                    Option::Some(estimated_retard) => {
+                                        ui.colored_label(
+                                            Color32::GREEN,
+                                            format!("Driven with {} min retard", estimated_retard),
+                                        );
+                                    }
+                                },
+                                _ => {
+                                    ui.colored_label(Color32::YELLOW, &train.drives);
+                                }
                             },
-                            "outage" => {
-                                ui.colored_label(Color32::RED, "Outage!");
-                            }
-                            "driven" => match &train.estimated_retard {
-                                Option::Some(estimated_retard) if estimated_retard == "0" => {
-                                    ui.colored_label(Color32::GREEN, "Driven");
-                                }
-                                Option::None => {
-                                    ui.colored_label(Color32::GREEN, "Driven");
-                                }
-                                Option::Some(estimated_retard) => {
-                                    ui.colored_label(
-                                        Color32::GREEN,
-                                        format!("Driven with {} min retard", estimated_retard),
-                                    );
+                        };
+                        match &train.additional_info {
+                            Option::Some(additional_info) => match &additional_info[..] {
+                                "" => (),
+                                _ => {
+                                    ui.colored_label(Color32::YELLOW, additional_info);
                                 }
                             },
-                            _ => {
-                                ui.colored_label(Color32::YELLOW, &train.drives);
-                            }
-                        },
-                    };
-                    match &train.additional_info {
-                        Option::Some(additional_info) => match &additional_info[..] {
-                            "" => (),
-                            _ => {
-                                ui.colored_label(Color32::YELLOW, additional_info);
-                            }
-                        },
-                        Option::None => (),
-                    };
-                    ui.separator();
-                }
-            })
+                            Option::None => (),
+                        };
+                        ui.end_row();
+                        ui.separator();
+                        ui.separator();
+                        ui.separator();
+                        ui.separator();
+                        ui.end_row();
+                    }
+                })
+            });
         });
     }
 
