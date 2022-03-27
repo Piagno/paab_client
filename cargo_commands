@@ -1,0 +1,2 @@
+wasm-bindgen target/wasm32-unknown-unknown/release/paab_client.wasm --out-dir webapp --no-modules --no-typescript
+cargo build --lib --target wasm32-unknown-unknown --release
