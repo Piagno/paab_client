@@ -125,6 +125,9 @@ impl App for Paab {
                                     "outage" => {
                                         ui.colored_label(Color32::RED, "Ausfall!");
                                     }
+                                    "outage_stl" => {
+                                        ui.colored_label(Color32::RED, "Wendung STL!");
+                                    }
                                     "driven" => match &train.estimated_retard {
                                         Option::Some(estimated_retard)
                                             if estimated_retard == "0" =>
